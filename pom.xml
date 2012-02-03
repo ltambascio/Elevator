@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>cscie16.hw1</groupId>
   <artifactId>Elevator</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0</version>
   <inceptionYear>2012</inceptionYear>
   <name>CSCIE 160 Homework #1</name>
   <dependencies>
