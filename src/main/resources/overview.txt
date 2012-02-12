@@ -69,3 +69,7 @@ These methods all have default package level visibility, and they are used by
 a test class I wrote to help test out the methods referenced above.
 
 
+Submission notes:
+	When I ran the javadoc tool, it gave me a complete "apidocs" site.  I have
+included that within the jar file.  Use the index.html file to look at the 
+javadoc documentation produced.

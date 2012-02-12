@@ -1,4 +1,4 @@
-package cscie160.hw1;
+package cscie160.hw2;
 
 /**
  * This is the Elevator class for CSCIE160 homework 1.

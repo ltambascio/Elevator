@@ -1,7 +1,9 @@
-package cscie160.hw1;
+package cscie160.hw2;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import cscie160.hw2.Elevator;
 import static org.testng.Assert.assertEquals;
 
 /**
