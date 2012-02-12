@@ -5,6 +5,27 @@
   <version>1.0</version>
   <inceptionYear>2012</inceptionYear>
   <name>CSCIE 160 Homework #1</name>
+  
+  <developers>
+  	<developer>
+  		<name>Larry Tambascio</name>
+  		<email>larry@tambascio.net</email>
+  	</developer>
+  </developers>
+  
+ 
+  <build>
+  	<resources>
+  		<resource>
+  			<directory>src/main/java</directory>
+  		</resource>
+  		<resource>
+  			<directory>src/main/resources</directory>
+  		</resource>
+  	</resources>
+  	<finalName>HW1</finalName>
+  </build>
+  
   <dependencies>
     <dependency>
       <groupId>org.testng</groupId>
@@ -13,4 +34,17 @@
       <scope>compile</scope>
     </dependency>
   </dependencies>
+  
+  <reporting>
+  	<plugins>
+  		<plugin>
+  			<groupId>org.apache.maven.plugins</groupId>
+  			<artifactId>maven-javadoc-plugin</artifactId>
+  			<version>2.8.1</version>
+  			<configuration>
+  				<show>private</show>
+  			</configuration>
+  		</plugin>
+  	</plugins>
+  </reporting>
 </project>

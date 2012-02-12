@@ -38,7 +38,7 @@ public class Elevator
 	 */
 	public Elevator()
 	{
-		/**
+		/*
 		 * Floors in buildings are 1 based, while arrays are 0 based.  Will 
 		 * need to adjust.
 		 */
@@ -54,7 +54,7 @@ public class Elevator
 	/**
 	 * Main method to demonstrate how the elevator behaves.
 	 * 
-	 * @param argv	Array of string command line parameters
+	 * @param args	Array of string command line parameters
 	 */
 	public static void main (String args[])
 	{
@@ -66,49 +66,46 @@ public class Elevator
 		
 		System.out.println(elevator);
 		
-		elevator.move();
+		for (int i = 0; i < 3; i++)
+			elevator.move();
 	}
 	
 	/**
-	 * Method to move the elevator in the current direction one floor.  If the 
-	 * elevator is at the top floor, it can't go up any higher, and if it is 
-	 * on the first floor, it can't go lower.
+	 * Method to move the elevator in the current direction until it stops at a
+	 * floor.  If the elevator is at the top floor going up or at the bottom
+	 * floor going down, it will switch direction.
 	 */
 	public void move ()
 	{
-		do
+		if (currentDirection)	// true => up
 		{
-			if (currentDirection)	// true => up
+			while (currentFloor < FLOORS - 1 && passengerCnt > 0)
 			{
-				while (currentFloor < FLOORS - 1 && passengerCnt > 0)
+				currentFloor++;
+				if (destination[currentFloor] > 0)
 				{
-					currentFloor++;
-					if (destination[currentFloor] > 0)
-					{
-						stop();
-						break;
-					}
+					stop();
+					break;
 				}
-				if (currentFloor == FLOORS - 1)
-					currentDirection = DOWN;
-				
 			}
-			else	// going down
-			{
-				while (currentFloor > 0 && passengerCnt > 0)
-				{
-					currentFloor--;
-					if (destination[currentFloor] > 0)
-					{
-						stop();
-						break;
-					}
-				}
-				if (currentFloor == 0)
-					currentDirection = UP;
-			}
+			if (currentFloor == FLOORS - 1)
+				currentDirection = DOWN;
+			
 		}
-		while (passengerCnt > 0);
+		else	// going down
+		{
+			while (currentFloor > 0 && passengerCnt > 0)
+			{
+				currentFloor--;
+				if (destination[currentFloor] > 0)
+				{
+					stop();
+					break;
+				}
+			}
+			if (currentFloor == 0)
+				currentDirection = UP;
+		}
 	}
 	
 	/**

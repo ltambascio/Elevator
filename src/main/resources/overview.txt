@@ -1,0 +1,71 @@
+Design:
+
+Class: cscie160.hw1.Elevator
+	This class represents an elevator.  As specified in the requirements there
+are a number of required methods, such as move, stop, and board passengers.  A
+couple of constants were suggested as well for elevator capacity and number of
+floors in the building.
+
+	In thinking about these methods, constants for the two directions (up and 
+down) seemed appropriate as well.  Since there are only two possible values, I 
+decided to make these constants boolean.  Arbitrarily I made up equivalent to 
+true, leaving down to be false.
+
+	The assignment specified data members for current floor and current 
+direction.  An array of integers for the destination define how many passengers 
+want to go to each floor.  I defined another convenience member to contain the 
+total number of passengers in the elevator.
+
+	A special note should be made about the current floor and destination array
+member variables.  The current floor variable is used as an index into the 
+array of destination floors.  In the real world, buildings don't normally have 
+a floor 0.  The first floor is floor 1.  In arrays, the elements are zero based
+so adjustments need to be taken into consideration.  Methods that accept a
+floor value should be decrement that value to represent the array element for 
+that floor.  Conversely when the value of the current floor needs to be 
+displayed, it needs to be incremented.
+
+Methods:
+
+Constructor:
+	The assignment specified that a no argument constructor initialize the 
+elevator's state.  It sets the current floor to 0 (which represents the first
+floor), the current direction to up, and initializes the destination array to 
+be all zeros.
+
+move:
+	This method will move the elevator until it stops at a floor for a passenger
+(or multiple passengers) to get off the elevator.  If the current direction is 
+up, the current floor will be incremented, and it will be decremented if it is 
+down.
+
+stop:
+	This method is invoked when the elevator arrives at a floor where at least
+one passenger wants to get off the elevator.  It will decrement the total number
+of passengers in the elevator by those getting off, and it will zero out the 
+destination array for that floor.  It then calls the toString method to display
+the current state of the elevator.
+
+boardPassenger:
+	This method provides a means for a single passenger to board the elevator 
+and select a destination floor.  The destination array is incremented at the 
+appropriate index (floor - 1), and the total passenger count is incremented as 
+well.
+
+toString:
+	This method overrides the default toString method in Object, and it displays
+relevant information such as the current floor, current direction, and the total
+number of passengers on the elevator.
+
+main:
+	This method allows for a simple, prescribed demo of the elevators
+functioning.  It boards three passengers.  Two are destined for the second 
+floor, and the third is going to the third floor.  It then uses a simple for 
+loop to call the move method three times.
+
+Accessor methods:
+	I also created a number of methods to get and set the state of the elevator.
+These methods all have default package level visibility, and they are used by
+a test class I wrote to help test out the methods referenced above.
+
+
