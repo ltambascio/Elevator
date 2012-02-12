@@ -60,9 +60,16 @@ public class Elevator
 	{
 		Elevator elevator = new Elevator();
 		
-		elevator.boardPassenger(2);
-		elevator.boardPassenger(2);
-		elevator.boardPassenger(3);
+		try
+		{
+			elevator.boardPassenger(2);
+			elevator.boardPassenger(2);
+			elevator.boardPassenger(3);
+		}
+		catch (ElevatorFullException efe)
+		{
+			efe.printStackTrace();
+		}
 		
 		System.out.println(elevator);
 		
@@ -122,13 +129,22 @@ public class Elevator
 	 * Adds one passenger to the elevator, with a specific floor as the
 	 * destination
 	 * 
-	 * @param floor		Destination floor for the passenger boarding the 
+	 * @param	floor	Destination floor for the passenger boarding the 
 	 * 					elevator
+	 * @throws	ElevatorFullException	Thrown when the elevator is at its
+	 * 									maximum capacity.
 	 */
 	public void boardPassenger(int floor)
+		throws ElevatorFullException
 	{
-		this.destination[floor - 1]++;
-		this.passengerCnt++;
+		if (this.destination[floor - 1] < CAPACITY)
+		{
+			this.destination[floor - 1]++;
+			this.passengerCnt++;
+		}
+		else
+			throw new ElevatorFullException("This elevator is at capacity on " +
+					"floor" + floor);
 	}
 
 	/**

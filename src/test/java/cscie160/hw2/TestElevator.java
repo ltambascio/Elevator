@@ -23,9 +23,10 @@ public class TestElevator
 	
 	/**
 	 * Test the moving up from the first floor
+	 * @throws ElevatorFullException Thrown if there's no room for the passenger
 	 */
 	@Test
-	public void testFirstMove()
+	public void testFirstMove() throws ElevatorFullException
 	{
 		elevator.boardPassenger(2);
 		elevator.move();
@@ -47,9 +48,10 @@ public class TestElevator
 	
 	/**
 	 * Basic moving down test
+	 * @throws ElevatorFullException Thrown if the elevator is at capacity
 	 */
 	@Test
-	public void testMoveDown()
+	public void testMoveDown() throws ElevatorFullException
 	{
 		elevator.setCurrentFloor(3);
 		elevator.boardPassenger(2);
@@ -60,9 +62,10 @@ public class TestElevator
 	
 	/**
 	 * Test moving up at the top
+	 * @throws ElevatorFullException Thrown if the elevator is at capacity.
 	 */
 	@Test
-	public void testMoveUpAtTop()
+	public void testMoveUpAtTop() throws ElevatorFullException
 	{
 		elevator.boardPassenger(7);
 		elevator.move();
@@ -73,15 +76,27 @@ public class TestElevator
 	
 	/**
 	 * Test boarding a passenger for the fifth floor.
+	 * @throws ElevatorFullException Thrown if elevator is at capacity
 	 */
 	@Test
-	public void testBoardPassenger()
+	public void testBoardPassenger() throws ElevatorFullException
 	{
 		elevator.boardPassenger(5);
 		assertEquals(elevator.getPassengerCnt(), 1, "wrong number of " +
 				"passengers");
 		int[] dest = elevator.getDestination();
 		assertEquals(dest[4], 1, "wrong number of passengers for floor");
+	}
+	
+	/**
+	 * Test boarding a passenger on an elevotor that is already full.
+	 * @throws ElevatorFullException Thrown when an elevator is at capacity
+	 */
+	@Test(expectedExceptions={ElevatorFullException.class})
+	public void testBoardPassengerFull () throws ElevatorFullException
+	{
+		elevator.setDestination(5, Elevator.CAPACITY);
+		elevator.boardPassenger(5);
 	}
 	
 	/**
