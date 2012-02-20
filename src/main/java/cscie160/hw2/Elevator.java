@@ -1,13 +1,20 @@
 package cscie160.hw2;
 
+import org.apache.log4j.Logger;
+
 /**
- * This is the Elevator class for CSCIE160 homework 1.
+ * This is the Elevator class for CSCIE160 homework 2.
  * 
  * @author Larry Tambascio
- * @version 1.0
+ * @version 1.1
  */
 public class Elevator
 {
+	/**
+	 * Log4j logging object
+	 */
+	private final static Logger log = Logger.getLogger("Elevator");
+	
 	public final static int CAPACITY = 10;
 	
 	public final static int FLOORS = 7;
@@ -21,6 +28,9 @@ public class Elevator
 	 */
 	private int currentFloor;
 	
+	/**
+	 * Total passengers on the elevator.
+	 */
 	private int passengerCnt;
 	
 	private boolean currentDirection;
@@ -30,6 +40,16 @@ public class Elevator
 	 * nobody is getting off at that floor.
 	 */
 	private int[] destination;
+	
+	/**
+	 * Array of booleans indicating whether a floor has called for an elevator.
+	 */
+	private boolean[] callingFloors;
+	
+	/**
+	 * An array of Floor objects that represent all the floors in the building. 
+	 */
+	private Floor[] floors;
 	
 	/**
 	 * No arg constructor to initiate the elevator's state.  The elevator is
@@ -49,6 +69,14 @@ public class Elevator
 		this.currentDirection = UP;
 		
 		this.destination = new int[FLOORS];
+		
+		this.floors = new Floor[FLOORS];
+		this.callingFloors = new boolean[FLOORS];
+		for (int i=0;i < FLOORS; i++)
+		{
+			this.floors[i] = new Floor();
+			this.callingFloors[i] = false;
+		}
 	}
 	
 	/**
@@ -59,22 +87,46 @@ public class Elevator
 	public static void main (String args[])
 	{
 		Elevator elevator = new Elevator();
+		Floor floor;
+		
+		// start out by loading people into floors and registering requests for
+		// those floors.
+		floor  = elevator.getFloor(2);
+		floor.setPassengerCnt(4);
+		elevator.registerRequest(2);
+		floor = elevator.getFloor(4);
+		floor.setPassengerCnt(6);
+		elevator.registerRequest(4);
+		floor = elevator.getFloor(6);
+		floor.setPassengerCnt(5);
+		elevator.registerRequest(6);
+		
+		// now load a bunch of passengers for different floors
+		// With 6 bound for the third floor, we'll definitely fill the elevator
+		// on the third floor.
 		
 		try
 		{
-			elevator.boardPassenger(2);
-			elevator.boardPassenger(2);
-			elevator.boardPassenger(3);
+			for (int i = 0; i < 6; i++)
+				elevator.boardPassenger(3);
+			elevator.boardPassenger(4);
+			elevator.boardPassenger(7);
 		}
 		catch (ElevatorFullException efe)
 		{
+			log.error("Somehow the elevator is full now.");
 			efe.printStackTrace();
 		}
 		
-		System.out.println(elevator);
+		log.info("Elevator initialization complete");
+		log.info(elevator);
+		log.info("Start moves");
 		
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 12; i++)
+		{
+			log.info("Executing move #" + (i + 1));
 			elevator.move();
+		}
 	}
 	
 	/**
@@ -86,32 +138,38 @@ public class Elevator
 	{
 		if (currentDirection)	// true => up
 		{
-			while (currentFloor < FLOORS - 1 && passengerCnt > 0)
+			while (currentFloor < FLOORS - 1)
 			{
 				currentFloor++;
-				if (destination[currentFloor] > 0)
+				if (destination[currentFloor] > 0 || callingFloors[currentFloor])
 				{
 					stop();
 					break;
 				}
 			}
 			if (currentFloor == FLOORS - 1)
+			{
+				log.info("Changing direction to down");
 				currentDirection = DOWN;
+			}
 			
 		}
 		else	// going down
 		{
-			while (currentFloor > 0 && passengerCnt > 0)
+			while (currentFloor > 0)
 			{
 				currentFloor--;
-				if (destination[currentFloor] > 0)
+				if (destination[currentFloor] > 0 || callingFloors[currentFloor])
 				{
 					stop();
 					break;
 				}
 			}
 			if (currentFloor == 0)
+			{
+				log.info("Changing direction to up");
 				currentDirection = UP;
+			}
 		}
 	}
 	
@@ -120,9 +178,12 @@ public class Elevator
 	 */
 	public void stop()
 	{
-		passengerCnt -= destination[currentFloor];
-		destination[currentFloor] = 0;
-		System.out.println(this);
+		// if we're stopping because of a request, then clear that request
+		if (callingFloors[currentFloor])
+			callingFloors[currentFloor] = false;
+		
+		floors[currentFloor].unloadPassengers(this);
+		log.info(this);
 	}
 	
 	/**
@@ -137,14 +198,30 @@ public class Elevator
 	public void boardPassenger(int floor)
 		throws ElevatorFullException
 	{
-		if (this.destination[floor - 1] < CAPACITY)
+		log.info("boarding a passenger destined for " + floor);
+		if (this.passengerCnt < CAPACITY)
 		{
 			this.destination[floor - 1]++;
 			this.passengerCnt++;
 		}
 		else
+		{
+			log.error("This elevator has reached capacity at floor " + 
+					getCurrentFloor());
 			throw new ElevatorFullException("This elevator is at capacity on " +
-					"floor" + floor);
+					"floor" + getCurrentFloor());
+		}
+	}
+	
+	/**
+	 * Method to register a floor calling an elevator, indicating there are 
+	 * passengers that need an elevator.
+	 * 
+	 * @param	floor	The floor with passengers requesting an elevator.
+	 */
+	public void registerRequest(int floor)
+	{
+		callingFloors[floor - 1] = true;
 	}
 
 	/**
@@ -214,9 +291,49 @@ public class Elevator
 		this.destination = destination;
 	}
 	
+	/**
+	 * Sets the passengers destined for the specified floor to the passed in 
+	 * passenger count.
+	 * 
+	 * @param	floor		Floor to update the count for
+	 * @param	passengers	Passengers destined for that floor
+	 */
 	void setDestination(int floor, int passengers)
 	{
 		this.destination[floor - 1] = passengers;
+	}
+	
+	/**
+	 * Return the requested floor object.
+	 * @param	floor	Floor number to return
+	 * @return
+	 */
+	Floor getFloor(int floor)
+	{
+		return floors[floor - 1];
+	}
+	
+	/**
+	 * Replaces a floor element in the array at the specified floor number.
+	 * 
+	 * @param	floorNum	Floor number to be replaced
+	 * @param	floor		Floor object to replace it with
+	 */
+	void setFloor(int floorNum, Floor floor)
+	{
+		floors[floorNum - 1] = floor;
+	}
+	
+	/**
+	 * This method will indicate whether the passed in floor has a stop request
+	 * associated with it.
+	 * @param	floor	Floor number to return the request flag for.
+	 * @return	<code>true</code> if a passenger on the floor has requested an 
+	 * 			elevator; <code>false</code> if not.
+	 */
+	boolean getCallingFloor(int floor)
+	{
+		return callingFloors[floor - 1];
 	}
 
 }

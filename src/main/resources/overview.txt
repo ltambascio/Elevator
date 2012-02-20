@@ -1,4 +1,107 @@
-Design:
+HW2 Design:
+Class: cscie160.hw2.Floor
+	This class represents a floor in the building the elevator is operating in.
+It is pretty simple at this point. It simply holds a number of passengers 
+waiting to go to the first floor, and it performs the process of unloading and
+loading passengers when the elevator arrives at the floor.
+
+Methods:
+
+Constructors:
+	I created two constructor methods for this class.  The no argument 
+constructor initializes the floor's passenger count to zero.  The second one 
+takes an integer to represent the initial number of passengers waiting for an 
+elevator.
+
+unloadPassengers:
+	This method accepts an Elevator object as a parameter.  First it unloads
+passengers from the elevator, and then it loads any waiting passengers on the 
+elevator.  For unloading passengers, it retrieves the number of passengers
+destined for the current floor.  It then zeros out the destination array element
+for the current floor.  This indicates that no passengers remain waiting for the
+floor.  This method will then decrease the total passenger count for the 
+elevator by the number of passengers that exited.
+
+	Then this method will use the boardPassenger method on the elevator object
+to board passengers one at a time.  All passengers boarded will be heading to 
+the ground floor (1).  As it is boarding passengers it will catch the elevator
+full exception.  This exception is handled by re-registering a stop request 
+with the elevator, and putting out a simple message to standard out (the 
+console).
+
+
+Class: cscie160.hw2.ElevatorFullException
+	This class is a simple exception used for flagging that an elevator is full.
+It extends java.lang.Exception, and it has its own message String variable.
+
+Methods:
+
+Constructor:
+	I coded one constructor that accepts a message string, which is stored in 
+the member variable "message".  I rely on the parent exception class for the no
+argument constructor.  This project will only use the constructor that takes a
+message.
+
+getMessage:
+	This method simply returns the message the exception was created with.
+
+
+Class: cscie160.hw2.Elevator
+	Some changes were necessary to this class from the previous assignment.  A 
+new array of Floor objects is used to represent the floors in the building, and 
+a boolean array will be used to signify floors requesting a stop for people 
+waiting.
+
+	I decided to use log4j to replace System.out.println, and it is configured 
+to simply log messages to System.out.
+
+Methods:
+
+Main:
+	This method will demonstrate the behavior of stopping at multiple floors,
+handling the elevator full exception, and floors that have passengers requesting 
+the elevator to pick them up.  It starts by loading passengers onto three 
+different floors.  Floor 2 gets 4 passengers, floor 4 gets 6 passengers, and 
+floor 6 gets 5 passengers.  It further initializes the elevator with passengers
+going to different floors.  It starts with 6 passengers wanting to go to the 
+3rd floor, and it then adds a passenger destined for floor 4 and floor 7.
+
+	It takes twelve calls to the move method for the elevator to successfully
+deliver everyone to their destined floors and pick everyone up from the various
+floors they are waiting on.  The elevator goes up to the top floor and back to
+the first floor twice during this run.
+
+Move:
+	The move method needed a slight enhancement.  Previously it would only call
+the stop method when there were passengers on the elevator who wanted to get 
+off at the current floor.  Now, it has to account for floors where passengers
+have requested elevator service.  Either condition should cause the stop method
+to be called. 
+
+Stop:
+	As specified in the assignment, the stop method passes control to the 
+Floor.unloadPassengers method.  If there was a stop request for the current 
+floor, the stop method will clear it by setting the floor's "calling request"
+element to false.
+
+Board Passenger:
+	This method now tests to see if the elevator is at capacity.  If it is at 
+capacity, it will now throw the ElevatorFullException exception, as well as 
+logging the fact.
+
+Register Request:
+	This new method will be called by a floor where there are people waiting for
+an elevator.  It simply sets to true the element of the callingFloors array for
+the passed in floor.
+
+Get Calling Floor:
+	This new method accepts a floor number and will return a boolean to the 
+caller indicating whether or not a passenger on the floor has requested an 
+elevator to pick them up.
+
+
+Previous notes follow below.
+HW1 Design:
 
 Class: cscie160.hw1.Elevator
 	This class represents an elevator.  As specified in the requirements there
