@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
  * This class represents one floor in a building.
  * 
  * @author	Larry Tambascio
- * @version	1.0
+ * @version	1.1
  */
 public class Floor
 {
@@ -16,27 +16,47 @@ public class Floor
 	private final static Logger log = Logger.getLogger("Floor");
 	
 	/**
+	 * The number of the floor in the building
+	 */
+	private int floorNum;
+	
+	/**
 	 * Number of passengers on this floor waiting to go to the first floor.
 	 */
 	private int passengerCnt;
 	
 	/**
 	 * No arg constructor that will initialize the number of passengers on a 
-	 * floor to 0.
+	 * floor to 0, and assume it's the first floor.
 	 */
 	public Floor ()
 	{
 		passengerCnt = 0;
+		floorNum = 1;
 	}
 	
 	/**
 	 * Constructor that takes a count of how many passengers are waiting for an
-	 * elevator
+	 * elevator, again assume it's the first floor.
 	 * 
 	 * @param	passengers	Number of passengers waiting for an elevator
 	 */
 	public Floor(int passengers)
 	{
+		passengerCnt = passengers;
+		floorNum = 1;
+	}
+	
+	/**
+	 * Constructor that takes a count of how many passengers are waiting for an
+	 * elevator, again assume it's the first floor.
+	 *
+	 * @param	floor		The floor number for this floor.
+	 * @param	passengers	Number of passengers waiting for an elevator
+	 */
+	public Floor(int floor, int passengers)
+	{
+		floorNum = floor;
 		passengerCnt = passengers;
 	}
 	
@@ -48,21 +68,15 @@ public class Floor
 	 */
 	public void unloadPassengers (Elevator elevator)
 	{
-		int currentFloor,
-			passengersGettingOff,
+		int passengersGettingOff,
 			elevCnt;
 		
 		// unload passengers
-		currentFloor = elevator.getCurrentFloor();
-		passengersGettingOff = elevator.getDestination(currentFloor);
-		log.info("Arriving at floor:" + currentFloor + " and discharging " +
-				passengersGettingOff + " passengers");
-		elevator.setDestination(currentFloor, 0);
+		passengersGettingOff = elevator.getDestination(floorNum);
+		elevator.setDestination(floorNum, 0);
 		elevCnt = elevator.getPassengerCnt();
 		elevator.setPassengerCnt(elevCnt - passengersGettingOff);
 		
-		log.info("Now attemtping to board " + passengerCnt + " passnegers on " +
-				"the elevator");
 		// board passengers
 		try {
 			
@@ -74,10 +88,30 @@ public class Floor
 		}
 		catch (ElevatorFullException efe)
 		{
-			elevator.registerRequest(currentFloor);	// re-register for a stop
+			elevator.registerRequest(floorNum);	// re-register for a stop
 		}
+		
+		log.info(this);
 	}
 	
+	/**
+	 * Floor number for this floor.
+	 * @return	Current floor number
+	 */
+	int getFloorNum()
+	{
+		return floorNum;
+	}
+
+	/**
+	 * Changes the current floor number
+	 * @param floorNum	New floor number for this floor
+	 */
+	void setFloorNum(int floorNum)
+	{
+		this.floorNum = floorNum;
+	}
+
 	/**
 	 * Current passenger count waiting for an elevator.
 	 * @return	Passenger count
@@ -94,6 +128,16 @@ public class Floor
 	void setPassengerCnt(int passengerCnt)
 	{
 		this.passengerCnt = passengerCnt;
+	}
+	
+	/**
+	 * Returns the state of this floor object
+	 * @return	Internal state of the floor
+	 */
+	@Override
+	public String toString()
+	{
+		return "Floor #" + floorNum + " - passenger count:" + passengerCnt;
 	}
 
 }

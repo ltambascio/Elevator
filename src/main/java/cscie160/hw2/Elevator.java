@@ -74,7 +74,7 @@ public class Elevator
 		this.callingFloors = new boolean[FLOORS];
 		for (int i=0;i < FLOORS; i++)
 		{
-			this.floors[i] = new Floor();
+			this.floors[i] = new Floor(i + 1, 0);
 			this.callingFloors[i] = false;
 		}
 	}
@@ -241,7 +241,7 @@ public class Elevator
 	 * @return	Adjust current floor to show the floor number as opposed to the 
 	 * 			array index.
 	 */
-	int getCurrentFloor()
+	public int getCurrentFloor()
 	{
 		return currentFloor + 1;
 	}
@@ -251,42 +251,78 @@ public class Elevator
 	 * index.
 	 * @param currentFloor
 	 */
-	void setCurrentFloor(int currentFloor)
+	protected void setCurrentFloor(int currentFloor)
 	{
 		this.currentFloor = currentFloor - 1;
 	}
 
-	int getPassengerCnt()
+	/**
+	 * Returns the total number of passengers on the elevator
+	 * @return	Passenger Count
+	 */
+	public int getPassengerCnt()
 	{
 		return passengerCnt;
 	}
 
-	void setPassengerCnt(int passengerCnt)
+	/**
+	 * Changes the number of passengers on the elevator outside of the 
+	 * <code>boardPassenger</code> or <code>stop</code> methods.
+	 * 
+	 * @param	passengerCnt	Passenger count to change
+	 */
+	protected void setPassengerCnt(int passengerCnt)
 	{
 		this.passengerCnt = passengerCnt;
 	}
 
-	boolean isDirectionUp()
+	/**
+	 * Returns <code>true</code> if the elevator is currently going up and 
+	 * <code>false</code> if it is going down.
+	 * 
+	 * @return	The current direction of the elevator
+	 */
+	public boolean isDirectionUp()
 	{
 		return currentDirection;
 	}
 
-	void setCurrentDirection(boolean currentDirection)
+	/**
+	 * Allows testing methods to set the direction the elevator is currently 
+	 * traveling in.
+	 * @param currentDirection	<code>true</code> indicates up and <code>false
+	 * 							</code> indicates down.
+	 */
+	protected void setCurrentDirection(boolean currentDirection)
 	{
 		this.currentDirection = currentDirection;
 	}
 
-	int[] getDestination()
+	/**
+	 * Returns the destination array indicating how many passengers are destined
+	 * for each floor.
+	 * @return	Destination array
+	 */
+	protected int[] getDestination()
 	{
 		return destination;
 	}
 	
-	int getDestination(int floor)
+	/**
+	 * Returns the number of people destined for the specified floor.
+	 * @param	floor	Floor number
+	 * @return	Count of people heading to the specified floor.
+	 */
+	public int getDestination(int floor)
 	{
 		return destination[floor - 1];
 	}
 
-	void setDestination(int[] destination)
+	/**
+	 * Method to setup the entire array of passenger's destination
+	 * @param	destination	Array of destinations for people.
+	 */
+	protected void setDestination(int[] destination)
 	{
 		this.destination = destination;
 	}
@@ -298,7 +334,7 @@ public class Elevator
 	 * @param	floor		Floor to update the count for
 	 * @param	passengers	Passengers destined for that floor
 	 */
-	void setDestination(int floor, int passengers)
+	public void setDestination(int floor, int passengers)
 	{
 		this.destination[floor - 1] = passengers;
 	}
@@ -308,7 +344,7 @@ public class Elevator
 	 * @param	floor	Floor number to return
 	 * @return
 	 */
-	Floor getFloor(int floor)
+	public Floor getFloor(int floor)
 	{
 		return floors[floor - 1];
 	}
@@ -319,7 +355,7 @@ public class Elevator
 	 * @param	floorNum	Floor number to be replaced
 	 * @param	floor		Floor object to replace it with
 	 */
-	void setFloor(int floorNum, Floor floor)
+	protected void setFloor(int floorNum, Floor floor)
 	{
 		floors[floorNum - 1] = floor;
 	}
@@ -331,7 +367,7 @@ public class Elevator
 	 * @return	<code>true</code> if a passenger on the floor has requested an 
 	 * 			elevator; <code>false</code> if not.
 	 */
-	boolean getCallingFloor(int floor)
+	public boolean getCallingFloor(int floor)
 	{
 		return callingFloors[floor - 1];
 	}

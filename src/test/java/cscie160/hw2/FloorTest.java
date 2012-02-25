@@ -53,6 +53,7 @@ public class FloorTest
 		for (int i = 0; i < 3; i++)	// board three passengers for the 5th floor
 			elevator.boardPassenger(5);
 		elevator.setCurrentFloor(5);
+		floor.setFloorNum(5);
 		floor.setPassengerCnt(4);	// Four passengers on the floor are waiting
 		
 		floor.unloadPassengers(elevator);
