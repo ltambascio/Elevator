@@ -1,7 +1,11 @@
-package cscie160.hw2;
+package cscie160.hw3;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import cscie160.hw3.Elevator;
+import cscie160.hw3.ElevatorFullException;
+import cscie160.hw3.Floor;
 
 import static org.testng.Assert.fail;
 import static org.testng.Assert.assertEquals;

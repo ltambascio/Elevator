@@ -1,4 +1,4 @@
-package cscie160.hw2;
+package cscie160.hw3;
 
 /**
  * Exception indicating the elevator is full and no more passengers may board.
