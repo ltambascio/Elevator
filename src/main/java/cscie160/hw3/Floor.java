@@ -1,12 +1,14 @@
 package cscie160.hw3;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 
 /**
  * This class represents one floor in a building.
  * 
  * @author	Larry Tambascio
- * @version	1.1
+ * @version	1.2
  */
 public class Floor
 {
@@ -26,6 +28,21 @@ public class Floor
 	private int passengerCnt;
 	
 	/**
+	 * Collection for passengers just hanging out on the floor
+	 */
+	private ArrayList onFloor;
+	
+	/**
+	 * Collection for passengers queued to go up
+	 */
+	private ArrayList goingUp;
+	
+	/**
+	 * Collections for passengers queued to go down
+	 */
+	private ArrayList goingDown;
+	
+	/**
 	 * No arg constructor that will initialize the number of passengers on a 
 	 * floor to 0, and assume it's the first floor.
 	 */
@@ -33,6 +50,8 @@ public class Floor
 	{
 		passengerCnt = 0;
 		floorNum = 1;
+		
+		initCollections();
 	}
 	
 	/**
@@ -45,6 +64,8 @@ public class Floor
 	{
 		passengerCnt = passengers;
 		floorNum = 1;
+		
+		initCollections();
 	}
 	
 	/**
@@ -58,6 +79,18 @@ public class Floor
 	{
 		floorNum = floor;
 		passengerCnt = passengers;
+		
+		initCollections();
+	}
+	
+	/**
+	 * Initialize the passenger collections.
+	 */
+	private void initCollections()
+	{
+		onFloor = new ArrayList();
+		goingUp = new ArrayList();
+		goingDown = new ArrayList();
 	}
 	
 	/**
@@ -98,7 +131,7 @@ public class Floor
 	 * Floor number for this floor.
 	 * @return	Current floor number
 	 */
-	int getFloorNum()
+	public int getFloorNum()
 	{
 		return floorNum;
 	}
@@ -107,7 +140,7 @@ public class Floor
 	 * Changes the current floor number
 	 * @param floorNum	New floor number for this floor
 	 */
-	void setFloorNum(int floorNum)
+	protected void setFloorNum(int floorNum)
 	{
 		this.floorNum = floorNum;
 	}
@@ -125,7 +158,7 @@ public class Floor
 	 * Sets the passenger count waiting on this floor for the elevator.
 	 * @param 	passengerCnt	Number of passengers waiting
 	 */
-	void setPassengerCnt(int passengerCnt)
+	protected void setPassengerCnt(int passengerCnt)
 	{
 		this.passengerCnt = passengerCnt;
 	}
