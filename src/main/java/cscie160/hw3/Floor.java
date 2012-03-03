@@ -23,47 +23,39 @@ public class Floor
 	private int floorNum;
 	
 	/**
-	 * Number of passengers on this floor waiting to go to the first floor.
-	 */
-	private int passengerCnt;
-	
-	/**
 	 * Collection for passengers just hanging out on the floor
 	 */
-	private ArrayList onFloor;
+	private ArrayList<Passenger> onFloor;
 	
 	/**
 	 * Collection for passengers queued to go up
 	 */
-	private ArrayList goingUp;
+	private ArrayList<Passenger> goingUp;
 	
 	/**
 	 * Collections for passengers queued to go down
 	 */
-	private ArrayList goingDown;
+	private ArrayList<Passenger> goingDown;
 	
 	/**
-	 * No arg constructor that will initialize the number of passengers on a 
-	 * floor to 0, and assume it's the first floor.
+	 * No arg constructor that will initializethe floor and assume it's the 
+	 * first floor.
 	 */
 	public Floor ()
 	{
-		passengerCnt = 0;
 		floorNum = 1;
 		
 		initCollections();
 	}
 	
 	/**
-	 * Constructor that takes a count of how many passengers are waiting for an
-	 * elevator, again assume it's the first floor.
+	 * Constructor that initializes what the current floor number is.
 	 * 
-	 * @param	passengers	Number of passengers waiting for an elevator
+	 * @param	floorNum	Floor number this floor represents
 	 */
-	public Floor(int passengers)
+	public Floor(int floorNum)
 	{
-		passengerCnt = passengers;
-		floorNum = 1;
+		this.floorNum = floorNum;
 		
 		initCollections();
 	}
@@ -75,22 +67,22 @@ public class Floor
 	 * @param	floor		The floor number for this floor.
 	 * @param	passengers	Number of passengers waiting for an elevator
 	 */
-	public Floor(int floor, int passengers)
-	{
-		floorNum = floor;
-		passengerCnt = passengers;
-		
-		initCollections();
-	}
+//	public Floor(int floor, int passengers)
+//	{
+//		floorNum = floor;
+//		passengerCnt = passengers;
+//		
+//		initCollections();
+//	}
 	
 	/**
 	 * Initialize the passenger collections.
 	 */
 	private void initCollections()
 	{
-		onFloor = new ArrayList();
-		goingUp = new ArrayList();
-		goingDown = new ArrayList();
+		onFloor = new ArrayList<Passenger>();
+		goingUp = new ArrayList<Passenger>();
+		goingDown = new ArrayList<Passenger>();
 	}
 	
 	/**
@@ -101,27 +93,47 @@ public class Floor
 	 */
 	public void unloadPassengers (Elevator elevator)
 	{
-		int passengersGettingOff,
-			elevCnt;
+		ArrayList<Passenger> passengersGettingOff,
+								boarded;
+		int elevCnt;
 		
 		// unload passengers
-		passengersGettingOff = elevator.getDestination(floorNum);
-		elevator.setDestination(floorNum, 0);
+		passengersGettingOff = elevator.getFloorPassengers(floorNum);
+		onFloor.addAll(passengersGettingOff);
+//		elevator.setDestination(floorNum, 0);
 		elevCnt = elevator.getPassengerCnt();
-		elevator.setPassengerCnt(elevCnt - passengersGettingOff);
+		elevator.setPassengerCnt(elevCnt - passengersGettingOff.size());
+		passengersGettingOff.clear();
 		
 		// board passengers
+		boarded = new ArrayList<Passenger>();
+		boolean currentlyUp = elevator.isDirectionUp();
 		try {
-			
-			while (passengerCnt > 0)
-			{
-				elevator.boardPassenger(1);
-				passengerCnt--;
-			}
+			if (currentlyUp)
+				for (Passenger pass:goingUp)
+				{
+					elevator.boardPassenger(pass);
+					boarded.add(pass);
+				}
+			else
+				for (Passenger pass:goingDown)
+				{
+					elevator.boardPassenger(pass);
+					boarded.add(pass);
+				}
 		}
 		catch (ElevatorFullException efe)
 		{
 			elevator.registerRequest(floorNum);	// re-register for a stop
+		}
+		finally
+		{
+			// Remove the passengers that boarded the elevator from the
+			// correct collection
+			if (currentlyUp)
+				goingUp.removeAll(boarded);
+			else
+				goingDown.removeAll(boarded);
 		}
 		
 		log.info(this);
@@ -144,25 +156,31 @@ public class Floor
 	{
 		this.floorNum = floorNum;
 	}
+	
+	/**
+	 * @return	the passengers hanging out on the floor
+	 */
+	public ArrayList<Passenger> getOnFloor()
+	{
+		return onFloor;
+	}
 
 	/**
-	 * Current passenger count waiting for an elevator.
-	 * @return	Passenger count
+	 * @return the goingUp passengers
 	 */
-	public int getPassengerCnt()
+	public ArrayList<Passenger> getGoingUp()
 	{
-		return passengerCnt;
+		return goingUp;
 	}
-	
+
 	/**
-	 * Sets the passenger count waiting on this floor for the elevator.
-	 * @param 	passengerCnt	Number of passengers waiting
+	 * @return the goingDown passengers
 	 */
-	protected void setPassengerCnt(int passengerCnt)
+	public ArrayList<Passenger> getGoingDown()
 	{
-		this.passengerCnt = passengerCnt;
+		return goingDown;
 	}
-	
+
 	/**
 	 * Returns the state of this floor object
 	 * @return	Internal state of the floor
@@ -170,7 +188,9 @@ public class Floor
 	@Override
 	public String toString()
 	{
-		return "Floor #" + floorNum + " - passenger count:" + passengerCnt;
+		return "Floor #" + floorNum + "\n\tOn Floor=" + onFloor.size() +
+				"\n\tGoing Up=" + goingUp.size() + "\n\tGoing Down=" + 
+				goingDown.size();
 	}
 
 }

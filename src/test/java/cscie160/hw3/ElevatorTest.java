@@ -3,6 +3,8 @@ package cscie160.hw3;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
+import java.util.ArrayList;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -14,6 +16,7 @@ import cscie160.hw3.Floor;
  * Class to test the Elevator object.
  * 
  * @author Larry Tambascio
+ * @version	1.3
  */
 public class ElevatorTest
 {
@@ -32,9 +35,12 @@ public class ElevatorTest
 	@Test
 	public void testFirstMove() throws ElevatorFullException
 	{
-		elevator.boardPassenger(2);
+		Passenger pass = new Passenger(1,2);
+		elevator.boardPassenger(pass);
 		elevator.move();
 		assertEquals(elevator.getCurrentFloor(), 2, "test first move");
+		assertEquals(elevator.getPassengerCnt(), 0, "there should be no " +
+				"passengers left");
 	}
 	
 	/**
@@ -57,8 +63,9 @@ public class ElevatorTest
 	@Test
 	public void testMoveDown() throws ElevatorFullException
 	{
+		Passenger pass = new Passenger(3,2);
 		elevator.setCurrentFloor(3);
-		elevator.boardPassenger(2);
+		elevator.boardPassenger(pass);
 		elevator.setCurrentDirection(false);
 		elevator.move();
 		assertEquals(elevator.getCurrentFloor(), 2, "Test move down");
@@ -71,7 +78,8 @@ public class ElevatorTest
 	@Test
 	public void testMoveUpAtTop() throws ElevatorFullException
 	{
-		elevator.boardPassenger(7);
+		Passenger pass = new Passenger(1,7);
+		elevator.boardPassenger(pass);
 		elevator.move();
 		assertEquals(elevator.getCurrentFloor(), 7, "test move up at top");
 		assertEquals(elevator.isDirectionUp(), false, "direction didn't change " +
@@ -85,36 +93,45 @@ public class ElevatorTest
 	@Test
 	public void testBoardPassenger() throws ElevatorFullException
 	{
-		elevator.boardPassenger(5);
+		ArrayList<Passenger> floorPassengers;
+		
+		Passenger pass = new Passenger(1,5);
+		elevator.boardPassenger(pass);
 		assertEquals(elevator.getPassengerCnt(), 1, "wrong number of " +
 				"passengers");
-		int[] dest = elevator.getDestination();
-		assertEquals(dest[4], 1, "wrong number of passengers for floor");
+		floorPassengers = elevator.getFloorPassengers(5);
+//		int[] dest = elevator.getDestination();
+		assertEquals(floorPassengers.size(), 1, "wrong number of passengers for floor");
 	}
 	
 	/**
 	 * Test boarding a passenger on an elevator that is already full.
 	 * @throws ElevatorFullException Thrown when an elevator is at capacity
 	 */
-	@Test(expectedExceptions={ElevatorFullException.class})
+	@Test(expectedExceptions=ElevatorFullException.class)
 	public void testBoardPassengerFull () throws ElevatorFullException
 	{
+		Passenger pass = new Passenger(1,5);
 		elevator.setPassengerCnt(Elevator.CAPACITY);
-		elevator.boardPassenger(5);
+		elevator.boardPassenger(pass);
 	}
 	
 	/**
 	 * Test the operations of the stop method.
+	 * @throws ElevatorFullException if elevator is full
 	 */
 	@Test
-	public void testStop()
+	public void testStop() throws ElevatorFullException
 	{
-		elevator.setDestination(3, 3);
+		Passenger pass = new Passenger(1,3);
+		for (int i = 0; i < 3; i++)
+			elevator.boardPassenger(pass);
+//		elevator.setDestination(3, 3);
 		elevator.setPassengerCnt(3);
 		elevator.setCurrentFloor(3);
 		elevator.stop();
 		assertEquals(elevator.getPassengerCnt(), 0, "left some passengers");
-		assertEquals(elevator.getDestination(3), 0, "still some passengers on 3");
+		assertEquals(elevator.getFloorPassengers(3).size(), 0, "still some passengers on 3");
 	}
 
 	/**
@@ -125,7 +142,8 @@ public class ElevatorTest
 	@Test
 	public void testStopOnCallingFloor()
 	{
-		Floor floor = new Floor(5);
+		Floor floor = new Floor();
+		
 		elevator.setFloor(3, floor);
 		elevator.registerRequest(3);
 		elevator.move();
@@ -133,7 +151,7 @@ public class ElevatorTest
 		assertEquals(elevator.getCurrentFloor(), 3, "Didn't stop on third floor");
 		assertEquals(elevator.getPassengerCnt(), 5, "Incorrect number of " +
 				"passengers on board");
-		assertEquals(elevator.getDestination(1), 5, "Incorrect passengers " +
+		assertEquals(elevator.getFloorPassengers(1).size(), 5, "Incorrect passengers " +
 				"headed to the first floor");
 	}
 	
@@ -186,15 +204,15 @@ public class ElevatorTest
 		// With 6 bound for the third floor, we'll definitely fill the elevator
 		// on the third floor.
 		for (int i = 0; i < 6; i++)
-			elevator.boardPassenger(3);
-		elevator.boardPassenger(4);
-		elevator.boardPassenger(7);
+			elevator.boardPassenger(new Passenger(1, 3));
+		elevator.boardPassenger(new Passenger(1, 4));
+		elevator.boardPassenger(new Passenger(1, 7));
 		
 		// Validate initial setup
 		assertEquals(elevator.getPassengerCnt(), 8, "Number of initial passengers");
-		assertEquals(elevator.getDestination(3), 6, "Passengers going to 3");
-		assertEquals(elevator.getDestination(4), 1, "Passengers going to 4");
-		assertEquals(elevator.getDestination(7), 1, "Passengers going to 7");
+		assertEquals(elevator.getFloorPassengers(3).size(), 6, "Passengers going to 3");
+		assertEquals(elevator.getFloorPassengers(4).size(), 1, "Passengers going to 4");
+		assertEquals(elevator.getFloorPassengers(7).size(), 1, "Passengers going to 7");
 		assertEquals(elevator.getFloor(2).getPassengerCnt(), 4, "second floor " +
 				"not setup right");
 		assertEquals(elevator.getFloor(4).getPassengerCnt(), 6, "fourth floor " +

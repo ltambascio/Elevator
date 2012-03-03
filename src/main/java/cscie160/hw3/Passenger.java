@@ -64,5 +64,16 @@ public class Passenger
 	{
 		this.destinationFloor = destinationFloor;
 	}
+	
+	/**
+	 * Returns the current state of the passenger instance.
+	 * @return	Current state of the passenger
+	 */
+	@Override
+	public String toString()
+	{
+		return "Passenger currently on: " + currentFloor + "; heading to: " +
+				destinationFloor;
+	}
 
 }

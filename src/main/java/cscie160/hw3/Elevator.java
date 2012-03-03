@@ -1,12 +1,14 @@
 package cscie160.hw3;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 
 /**
  * This is the Elevator class for CSCIE160 homework 2.
  * 
  * @author Larry Tambascio
- * @version 1.1
+ * @version 1.3
  */
 public class Elevator
 {
@@ -33,13 +35,21 @@ public class Elevator
 	 */
 	private int passengerCnt;
 	
+	/**
+	 * Collection of passengers on the elevator.  The number of floors is 
+	 * constant, so that should still be an array, but the number of passengers
+	 * on each floor can vary greatly, so each floor should be an ArrayList of 
+	 * Passengers.
+	 */
+	private ArrayList<Passenger>[] elevPassengers;
+	
 	private boolean currentDirection;
 	
 	/**
 	 * Number of passengers destined for a particular floor.  Zero implies
 	 * nobody is getting off at that floor.
 	 */
-	private int[] destination;
+//	private int[] destination;
 	
 	/**
 	 * Array of booleans indicating whether a floor has called for an elevator.
@@ -68,14 +78,16 @@ public class Elevator
 		
 		this.currentDirection = UP;
 		
-		this.destination = new int[FLOORS];
+//		this.destination = new int[FLOORS];
 		
 		this.floors = new Floor[FLOORS];
 		this.callingFloors = new boolean[FLOORS];
+		this.elevPassengers = new ArrayList[FLOORS];
 		for (int i=0;i < FLOORS; i++)
 		{
-			this.floors[i] = new Floor(i + 1, 0);
+			this.floors[i] = new Floor(i + 1);
 			this.callingFloors[i] = false;
+			this.elevPassengers[i] = new ArrayList<Passenger>();
 		}
 	}
 	
@@ -91,32 +103,32 @@ public class Elevator
 		
 		// start out by loading people into floors and registering requests for
 		// those floors.
-		floor  = elevator.getFloor(2);
-		floor.setPassengerCnt(4);
-		elevator.registerRequest(2);
-		floor = elevator.getFloor(4);
-		floor.setPassengerCnt(6);
-		elevator.registerRequest(4);
-		floor = elevator.getFloor(6);
-		floor.setPassengerCnt(5);
-		elevator.registerRequest(6);
+//		floor  = elevator.getFloor(2);
+//		floor.setPassengerCnt(4);
+//		elevator.registerRequest(2);
+//		floor = elevator.getFloor(4);
+//		floor.setPassengerCnt(6);
+//		elevator.registerRequest(4);
+//		floor = elevator.getFloor(6);
+//		floor.setPassengerCnt(5);
+//		elevator.registerRequest(6);
 		
 		// now load a bunch of passengers for different floors
 		// With 6 bound for the third floor, we'll definitely fill the elevator
 		// on the third floor.
 		
-		try
-		{
-			for (int i = 0; i < 6; i++)
-				elevator.boardPassenger(3);
-			elevator.boardPassenger(4);
-			elevator.boardPassenger(7);
-		}
-		catch (ElevatorFullException efe)
-		{
-			log.error("Somehow the elevator is full now.");
-			efe.printStackTrace();
-		}
+//		try
+//		{
+//			for (int i = 0; i < 6; i++)
+//				elevator.boardPassenger(3);
+//			elevator.boardPassenger(4);
+//			elevator.boardPassenger(7);
+//		}
+//		catch (ElevatorFullException efe)
+//		{
+//			log.error("Somehow the elevator is full now.");
+//			efe.printStackTrace();
+//		}
 		
 		log.info("Elevator initialization complete");
 		log.info(elevator);
@@ -141,7 +153,7 @@ public class Elevator
 			while (currentFloor < FLOORS - 1)
 			{
 				currentFloor++;
-				if (destination[currentFloor] > 0 || callingFloors[currentFloor])
+				if (elevPassengers[currentFloor].size() > 0 || callingFloors[currentFloor])
 				{
 					stop();
 					break;
@@ -159,7 +171,7 @@ public class Elevator
 			while (currentFloor > 0)
 			{
 				currentFloor--;
-				if (destination[currentFloor] > 0 || callingFloors[currentFloor])
+				if (elevPassengers[currentFloor].size() > 0 || callingFloors[currentFloor])
 				{
 					stop();
 					break;
@@ -195,13 +207,14 @@ public class Elevator
 	 * @throws	ElevatorFullException	Thrown when the elevator is at its
 	 * 									maximum capacity.
 	 */
-	public void boardPassenger(int floor)
+	public void boardPassenger(Passenger passenger)
 		throws ElevatorFullException
 	{
-		log.info("boarding a passenger destined for " + floor);
+		log.info("boarding a passenger destined for " + passenger.getDestinationFloor());
 		if (this.passengerCnt < CAPACITY)
 		{
-			this.destination[floor - 1]++;
+			elevPassengers[passenger.getDestinationFloor() - 1].add(passenger);
+//			this.destination[floor - 1]++;
 			this.passengerCnt++;
 		}
 		else
@@ -230,8 +243,9 @@ public class Elevator
 	@Override
 	public String toString()
 	{
-		return "Elevator [currentFloor=" + getCurrentFloor() + ", currentDirection="
-				+ (currentDirection ? "Up" : "Down") + ", passengerCnt=" + passengerCnt + "]";
+		return "Elevator [currentFloor=" + getCurrentFloor() + ", " +
+				"currentDirection=" + (currentDirection ? "Up" : "Down") + 
+				", passengerCnt=" + passengerCnt + "]";
 	}
 	
 	// Getters and setters to facilitate testing
@@ -297,35 +311,45 @@ public class Elevator
 	{
 		this.currentDirection = currentDirection;
 	}
+	
+	/**
+	 * Return the array list for the selected floor.
+	 * @param	floor	Floor number to retrieve
+	 * @return	Passenger array list for the specified floor.
+	 */
+	public ArrayList<Passenger> getFloorPassengers(int floor)
+	{
+		return elevPassengers[floor - 1];
+	}
 
 	/**
 	 * Returns the destination array indicating how many passengers are destined
 	 * for each floor.
 	 * @return	Destination array
 	 */
-	protected int[] getDestination()
-	{
-		return destination;
-	}
+//	protected int[] getDestination()
+//	{
+//		return destination;
+//	}
 	
 	/**
 	 * Returns the number of people destined for the specified floor.
 	 * @param	floor	Floor number
 	 * @return	Count of people heading to the specified floor.
 	 */
-	public int getDestination(int floor)
-	{
-		return destination[floor - 1];
-	}
+//	public int getDestination(int floor)
+//	{
+//		return destination[floor - 1];
+//	}
 
 	/**
 	 * Method to setup the entire array of passenger's destination
 	 * @param	destination	Array of destinations for people.
 	 */
-	protected void setDestination(int[] destination)
-	{
-		this.destination = destination;
-	}
+//	protected void setDestination(int[] destination)
+//	{
+//		this.destination = destination;
+//	}
 	
 	/**
 	 * Sets the passengers destined for the specified floor to the passed in 
@@ -334,10 +358,10 @@ public class Elevator
 	 * @param	floor		Floor to update the count for
 	 * @param	passengers	Passengers destined for that floor
 	 */
-	public void setDestination(int floor, int passengers)
-	{
-		this.destination[floor - 1] = passengers;
-	}
+//	public void setDestination(int floor, int passengers)
+//	{
+//		this.destination[floor - 1] = passengers;
+//	}
 	
 	/**
 	 * Return the requested floor object.
