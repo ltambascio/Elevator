@@ -54,7 +54,8 @@ public class Elevator
 	/**
 	 * Array of booleans indicating whether a floor has called for an elevator.
 	 */
-	private boolean[] callingFloors;
+	private boolean[]	upCalls,
+						downCalls;
 	
 	/**
 	 * An array of Floor objects that represent all the floors in the building. 
@@ -78,15 +79,14 @@ public class Elevator
 		
 		this.currentDirection = UP;
 		
-//		this.destination = new int[FLOORS];
-		
 		this.floors = new Floor[FLOORS];
-		this.callingFloors = new boolean[FLOORS];
+		this.upCalls = new boolean[FLOORS];
+		this.downCalls = new boolean[FLOORS];
 		this.elevPassengers = new ArrayList[FLOORS];
 		for (int i=0;i < FLOORS; i++)
 		{
 			this.floors[i] = new Floor(i + 1);
-			this.callingFloors[i] = false;
+			this.upCalls[i] = false;
 			this.elevPassengers[i] = new ArrayList<Passenger>();
 		}
 	}
@@ -99,42 +99,59 @@ public class Elevator
 	public static void main (String args[])
 	{
 		Elevator elevator = new Elevator();
-		Floor floor;
+		
+		// Start with a bunch of passengers on the elevator bound for different
+		// floors
+		try {
+			for (int i = 0; i < 3; i++)
+				elevator.boardPassenger(new Passenger(1, 3));
+			for (int i = 0; i < 3; i++)
+				elevator.boardPassenger(new Passenger(1, 4));
+			for (int i = 0; i < 3; i++)
+				elevator.boardPassenger(new Passenger(1, 7));
+		}
+		catch (ElevatorFullException efe)
+		{
+			log.error(efe);
+		}
 		
 		// start out by loading people into floors and registering requests for
-		// those floors.
-//		floor  = elevator.getFloor(2);
-//		floor.setPassengerCnt(4);
-//		elevator.registerRequest(2);
-//		floor = elevator.getFloor(4);
-//		floor.setPassengerCnt(6);
-//		elevator.registerRequest(4);
-//		floor = elevator.getFloor(6);
-//		floor.setPassengerCnt(5);
-//		elevator.registerRequest(6);
+		// those floors in different directions.
 		
-		// now load a bunch of passengers for different floors
-		// With 6 bound for the third floor, we'll definitely fill the elevator
-		// on the third floor.
+		// second floor
+		// 4 passengers going down to 1
+		// 3 passengers going up to 5
+		elevator.initFloorForTest(2, 5, 3, 1, 4);
 		
-//		try
-//		{
-//			for (int i = 0; i < 6; i++)
-//				elevator.boardPassenger(3);
-//			elevator.boardPassenger(4);
-//			elevator.boardPassenger(7);
-//		}
-//		catch (ElevatorFullException efe)
-//		{
-//			log.error("Somehow the elevator is full now.");
-//			efe.printStackTrace();
-//		}
+		// third floor
+		// 2 going down to 1
+		// 3 going up to 4
+		elevator.initFloorForTest(3, 4, 3, 1, 2);
+		
+		// fourth floor
+		// 2 going down to 2
+		// 1 going up to 5
+		elevator.initFloorForTest(4, 5, 1, 2, 2);
+		
+		// fifth floor
+		// 1 going down to 3
+		// 1 going up to 7
+		elevator.initFloorForTest(5, 7, 1, 3, 1);
+		
+		// sixth floor
+		// 3 going up to 7
+		// 5 going down to 4
+		elevator.initFloorForTest(6, 7, 3, 4, 5);
+		
+		// seventh floor
+		// 0 going up
+		// 5 going down to 1
+		elevator.initFloorForTest(7, 0, 0, 1, 5);
 		
 		log.info("Elevator initialization complete");
 		log.info(elevator);
-		log.info("Start moves");
 		
-		for (int i = 0; i < 12; i++)
+		for (int i = 0; i < 19; i++)
 		{
 			log.info("Executing move #" + (i + 1));
 			elevator.move();
@@ -153,34 +170,27 @@ public class Elevator
 			while (currentFloor < FLOORS - 1)
 			{
 				currentFloor++;
-				if (elevPassengers[currentFloor].size() > 0 || callingFloors[currentFloor])
+				if (currentFloor == FLOORS - 1)
+					currentDirection = DOWN;
+				if (elevPassengers[currentFloor].size() > 0 || upCalls[currentFloor])
 				{
 					stop();
 					break;
 				}
 			}
-			if (currentFloor == FLOORS - 1)
-			{
-				log.info("Changing direction to down");
-				currentDirection = DOWN;
-			}
-			
 		}
 		else	// going down
 		{
 			while (currentFloor > 0)
 			{
 				currentFloor--;
-				if (elevPassengers[currentFloor].size() > 0 || callingFloors[currentFloor])
+				if (currentFloor == 0)
+					currentDirection = UP;
+				if (elevPassengers[currentFloor].size() > 0 || downCalls[currentFloor])
 				{
 					stop();
 					break;
 				}
-			}
-			if (currentFloor == 0)
-			{
-				log.info("Changing direction to up");
-				currentDirection = UP;
 			}
 		}
 	}
@@ -191,19 +201,20 @@ public class Elevator
 	public void stop()
 	{
 		// if we're stopping because of a request, then clear that request
-		if (callingFloors[currentFloor])
-			callingFloors[currentFloor] = false;
+		if (upCalls[currentFloor] && currentDirection == UP)
+			upCalls[currentFloor] = false;
+		else if (downCalls[currentFloor] && currentDirection == DOWN)
+			downCalls[currentFloor] = false;
 		
-		floors[currentFloor].unloadPassengers(this);
 		log.info(this);
+		floors[currentFloor].unloadPassengers(this);
 	}
 	
 	/**
-	 * Adds one passenger to the elevator, with a specific floor as the
-	 * destination
+	 * Adds one passenger to the elevator.
 	 * 
-	 * @param	floor	Destination floor for the passenger boarding the 
-	 * 					elevator
+	 * @param	passenger	Passenger boarding the elevator.  The passenger
+	 * 						knows which floor it's destined for.
 	 * @throws	ElevatorFullException	Thrown when the elevator is at its
 	 * 									maximum capacity.
 	 */
@@ -230,11 +241,16 @@ public class Elevator
 	 * Method to register a floor calling an elevator, indicating there are 
 	 * passengers that need an elevator.
 	 * 
-	 * @param	floor	The floor with passengers requesting an elevator.
+	 * @param	floor		The floor with passengers requesting an elevator.
+	 * @param	direction	Direction of the request - <code>true</code> means
+	 * 						up and <code>false</code> means down
 	 */
-	public void registerRequest(int floor)
+	public void registerRequest(int floor, boolean direction)
 	{
-		callingFloors[floor - 1] = true;
+		if (direction)
+			upCalls[floor - 1] = true;
+		else
+			downCalls[floor - 1] = true;
 	}
 
 	/**
@@ -243,9 +259,24 @@ public class Elevator
 	@Override
 	public String toString()
 	{
-		return "Elevator [currentFloor=" + getCurrentFloor() + ", " +
-				"currentDirection=" + (currentDirection ? "Up" : "Down") + 
-				", passengerCnt=" + passengerCnt + "]";
+		StringBuffer sb;
+		
+		sb = new StringBuffer("Elevator [currentFloor=");
+		sb.append(getCurrentFloor());
+		sb.append(", currentDirection=");
+		sb.append(currentDirection ? "Up" : "Down"); 
+		sb.append(", passengerCnt=");
+		sb.append(passengerCnt); 
+		sb.append("]\nPassenger Detail:\n===============");
+		for (int i = 0; i < FLOORS; i++)
+			for (Passenger p: elevPassengers[i])
+			{
+				sb.append("\n\t");
+				sb.append(p);
+			}
+		sb.append("\n===============");
+		
+		return sb.toString();
 	}
 	
 	// Getters and setters to facilitate testing
@@ -323,50 +354,9 @@ public class Elevator
 	}
 
 	/**
-	 * Returns the destination array indicating how many passengers are destined
-	 * for each floor.
-	 * @return	Destination array
-	 */
-//	protected int[] getDestination()
-//	{
-//		return destination;
-//	}
-	
-	/**
-	 * Returns the number of people destined for the specified floor.
-	 * @param	floor	Floor number
-	 * @return	Count of people heading to the specified floor.
-	 */
-//	public int getDestination(int floor)
-//	{
-//		return destination[floor - 1];
-//	}
-
-	/**
-	 * Method to setup the entire array of passenger's destination
-	 * @param	destination	Array of destinations for people.
-	 */
-//	protected void setDestination(int[] destination)
-//	{
-//		this.destination = destination;
-//	}
-	
-	/**
-	 * Sets the passengers destined for the specified floor to the passed in 
-	 * passenger count.
-	 * 
-	 * @param	floor		Floor to update the count for
-	 * @param	passengers	Passengers destined for that floor
-	 */
-//	public void setDestination(int floor, int passengers)
-//	{
-//		this.destination[floor - 1] = passengers;
-//	}
-	
-	/**
 	 * Return the requested floor object.
 	 * @param	floor	Floor number to return
-	 * @return
+	 * @return	Floor object requested
 	 */
 	public Floor getFloor(int floor)
 	{
@@ -393,7 +383,34 @@ public class Elevator
 	 */
 	public boolean getCallingFloor(int floor)
 	{
-		return callingFloors[floor - 1];
+		return upCalls[floor - 1];
+	}
+
+	/**
+	 * Convenience method to initialize a floor for testing
+	 * 
+	 * @param	floorNum	Floor to modify
+	 * @param	upFloor		Floor people are going up to
+	 * @param	upCount		Number of people going up
+	 * @param	downFloor	Floor people are going down to
+	 * @param	downCount	Number of people going down
+	 */
+	private void initFloorForTest(int floorNum, int upFloor, int upCount,
+			int downFloor, int downCount)
+	{
+		Floor floor;
+		
+		floor = this.getFloor(floorNum);
+		for (int i=0; i < downCount; i++)
+			floor.getGoingDown().add(new Passenger(floorNum, downFloor));
+		for (int i=0; i < upCount; i++)
+			floor.getGoingUp().add(new Passenger(floorNum, upFloor));
+		if (downCount > 0)
+			this.registerRequest(floorNum, Elevator.DOWN);
+		if (upCount > 0)
+			this.registerRequest(floorNum, Elevator.UP);
+		
+		log.info(floor);
 	}
 
 }

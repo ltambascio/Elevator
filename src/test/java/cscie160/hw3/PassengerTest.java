@@ -22,29 +22,39 @@ public class PassengerTest
 		passenger = new Passenger(1,Elevator.FLOORS);
 	}
 
-	@Test
+	@Test(groups="unit")
 	public void getCurrentFloor()
 	{
 		assertEquals(passenger.getCurrentFloor(), 1, "default current floor");
 	}
 
-	@Test
+	@Test(groups="unit")
 	public void getDestinationFloor()
 	{
 		assertEquals(passenger.getDestinationFloor(), 7, "get destination floor");
 	}
 
-	@Test
+	@Test(groups="unit")
 	public void setCurrentFloor()
 	{
 		passenger.setCurrentFloor(2);
 		assertEquals(passenger.getCurrentFloor(), 2, "set current floor");
 	}
 
-	@Test
+	@Test(groups="unit")
 	public void setDestinationFloor()
 	{
 		passenger.setDestinationFloor(5);
 		assertEquals(passenger.getDestinationFloor(), 5, "set destination floor");
+	}
+	
+	@Test(groups="unit")
+	public void testArrival()
+	{
+		Floor floor = new Floor(5);
+		
+		passenger.arrive(floor);
+		
+		assertEquals(passenger.getCurrentFloor(), 5, "Now on 5th floor");
 	}
 }

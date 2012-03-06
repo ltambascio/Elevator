@@ -38,7 +38,7 @@ public class Floor
 	private ArrayList<Passenger> goingDown;
 	
 	/**
-	 * No arg constructor that will initializethe floor and assume it's the 
+	 * No arg constructor that will initialize the floor and assume it's the 
 	 * first floor.
 	 */
 	public Floor ()
@@ -59,21 +59,6 @@ public class Floor
 		
 		initCollections();
 	}
-	
-	/**
-	 * Constructor that takes a count of how many passengers are waiting for an
-	 * elevator, again assume it's the first floor.
-	 *
-	 * @param	floor		The floor number for this floor.
-	 * @param	passengers	Number of passengers waiting for an elevator
-	 */
-//	public Floor(int floor, int passengers)
-//	{
-//		floorNum = floor;
-//		passengerCnt = passengers;
-//		
-//		initCollections();
-//	}
 	
 	/**
 	 * Initialize the passenger collections.
@@ -99,8 +84,11 @@ public class Floor
 		
 		// unload passengers
 		passengersGettingOff = elevator.getFloorPassengers(floorNum);
-		onFloor.addAll(passengersGettingOff);
-//		elevator.setDestination(floorNum, 0);
+		for (Passenger pass: passengersGettingOff)
+		{
+			pass.arrive(this);
+			onFloor.add(pass);
+		}
 		elevCnt = elevator.getPassengerCnt();
 		elevator.setPassengerCnt(elevCnt - passengersGettingOff.size());
 		passengersGettingOff.clear();
@@ -124,7 +112,7 @@ public class Floor
 		}
 		catch (ElevatorFullException efe)
 		{
-			elevator.registerRequest(floorNum);	// re-register for a stop
+			elevator.registerRequest(floorNum, elevator.isDirectionUp());	// re-register for a stop
 		}
 		finally
 		{

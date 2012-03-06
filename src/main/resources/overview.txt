@@ -1,3 +1,150 @@
+HW3 Design:
+
+Class: cscie160.hw3.Passenger
+	This class represents a passenger.  It has two primary data elements, the 
+current floor the passenger is on, and the destination floor where he wants to
+go.  These data elements are private.  There are accessor methods for those 
+elements, and there is an "arrive" method to call when the passenger arrives at 
+the destination.
+
+Methods:
+
+Constructor:
+	There is one constructor for this class, and it requires a value for both
+the current floor and the destination floor.  
+
+Accessors:
+	There are get and set methods for each of the two data elements in
+Passenger.  They are getCurrentFloor(), setCurrentFloor(int), 
+getDestinationFloor(), and setDestinationFloor(int).
+
+Arrive:
+	This method is invoked when a passenger arrives on a floor.  It accepts a 
+Floor object as a parameter, which is supposed to be the floor the user has 
+arrived at.  The method then updates the current floor value to be the floor 
+number of the floor object passed in.
+
+
+Class: cscie160.hw3.Elevator:
+	This class has had a number of enhancements over the previous homework 
+version.  Most of them center around incorporating the new Passenger class.  
+The elevator should have a passenger object for each passenger that is on board,
+and they should be organized around which floor they're destined for.  Previous
+versions of this class used a simple array of integers as a count of how many 
+passengers were destined for each floor.  The array has been expanded to contain
+ArrayList<Passenger> objects.  This allows the number of passengers destined for
+a given floor to grow and shrink as necessary.  Using an array to represent the
+different floors makes sense, since the number of floors in a building should
+never really vary or need to grow and shrink.
+
+Methods:
+
+Constructor:
+	The constructor was modified to initialize the array of 
+ArrayList<Passenger>s.  Each element of the elevPassengers array is initialized
+with a new ArrayList<Passenger>.
+
+Main:
+	The main method demonstrates the behavior of this array of ArrayLists of 
+Passenger objects.  It starts out by creating 9 passengers headed to 3 
+different floors by calling the boardPassenger method.  The main method 
+initializes each floor, besides the first, with somewhat random numbers of 
+passengers headed to different floors.  A convenience method (initFloorForTest)
+is used to populate each floor object.  It then takes 19 distinct calls to the
+move method to fully exercise the classes and have all passengers delivered to
+where they want to go.  The elevator will travel to the top and back down again 
+three times.
+
+Move:
+	The move method needs a slight modification to get the size of the ArrayList
+for the current floor to determine if any passenger want to get off on that 
+floor.  I discovered a bug in this method.  If passengers were on the top floor, 
+they would not be picked up because the direction had not been changed to DOWN 
+at the right time.  After incrementing the current floor counter going up (or 
+decrementing it going down), testing at that point to see if the direction 
+needed to be changed was the correct place to do it.  The previous version of 
+the method left the direction as up, even though the elevator was at the top 
+floor.  The unloadPassengers method would look to the goingUp collection of the 
+floor to board passengers, but on the top floor there should never be passengers
+going up.  Changing the direction before calling stop corrects this problem.  
+Now passengers will not be forever stuck on the top floor.
+
+Stop:
+	Because the elevator class now has two boolean arrays for stop requests, one 
+for requests to go up and one for going down, the stop method needs to clear 
+requests for the floor in the correct direction.  Once that flag is cleared for
+the current floor, the floor's unloadPassengers method is called.
+
+Board Passenger:
+	This method now accepts a passenger object as the parameter.  The passenger
+object contains the current and destination floor values.  Using the destination
+floor value as the index into the elevPassengers array, the passed in passenger
+object is added to the collection of passengers destined for the particular 
+floor.
+
+Register Request:
+	The registerRequest method needed a new parameter added to indicate which
+direction the request was for.  This would indicate which request array, either
+upCalls or downCalls, gets updated.
+
+To String:
+	The requirements specified that the toString method should also gather 
+information about each passenger on the elevator when called.  Since this method
+would now need to loop through an array for the floors and then an ArrayList for
+the passengers headed for that floor, I now use a StringBuffer to gather the 
+passnger details.  I also use some newline (\n) and tab (\t) characters to 
+format the output to make it more readable.
+
+
+Class: cscie160.hw3.Floor
+	This class had one major change to it, in that it uses collections to 
+organize passengers.  I used ArrayList<Passenger> to hold the groups of 
+passengers that were going up, going down, and had arrived "on the floor".  The
+on floor passengers for this version weren't necessarily going anywhere else, 
+but we now had a way to differentiate between passengers that were going up and 
+those going down.  All three collections were ArrayList<Passenger>.
+	I also added a floor number data element so the floor object knows what 
+floor in a building it represents.
+
+Methods:
+
+Constructors:
+	There are two constructors in this class.  The no argument constructor 
+assumes the floor number is the first floor.  The other constructor accepts an
+integer value that represents the floor number.  Both constructors call a 
+private method to initialize the three different collections.
+
+Unload Passengers:
+	Since the elevator and floor objects use ArrayLists, we can take advantage
+of some of the methods and looping constructs for manipulating them.  For each
+passenger getting off the elevator, we can simply add that person to the "on
+floor" collection directly.  The passenger's arrive method is called to update
+their current floor value.  Once all the passengers have been added to the 
+floor, the collection for the destination floor is cleared using the clear()
+method.
+	For boarding passengers from the current floor to the elevator we again use
+collection iteration (e.g. for (Passenger pass:goingUp)).  This allows us to 
+board one passenger at a time until either all passengers are on or the elevator
+gets full.  As we are boarding passengers, we add them to a temporary collection
+so that the boarded passengers (and only the boarded passengers) get removed
+from either the goingUp or goingDown collection respectively.
+
+Accessor Methods:
+	With the new floor number data element, new getter and setter methods were
+created.  The getFloorNum method is public because anyone should be able to ask
+what the number is for a given floor, but the setFloorNum method is protected
+so that only subclasses and classes in the same package could possibly change 
+the floor number.
+	For the three collections of passengers on the floor, three getter methods
+were created, but no set methods.  Those collections should only be modified 
+by the unloadPassengers method.
+
+To String:
+	The toString method simply details the floor number along with the number 
+of passengers in each collection in a single line of string text.
+
+
+--------------------------------------------------------------------------------
 HW2 Design:
 Class: cscie160.hw2.Floor
 	This class represents a floor in the building the elevator is operating in.

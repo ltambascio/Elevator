@@ -16,13 +16,23 @@ public class Passenger
 	 * Constructor for a passenger that has a current floor and a destination
 	 * in mind.
 	 * 
-	 * @param currentFloor
-	 * @param destinationFloor
+	 * @param currentFloor		Floor the passenger is currently on
+	 * @param destinationFloor	Floor they want to go to
 	 */
 	public Passenger(int currentFloor, int destinationFloor)
 	{
 		this.currentFloor = currentFloor;
 		this.destinationFloor = destinationFloor;
+	}
+	
+	/**
+	 * Update the current floor the passenger occupies
+	 * 
+	 * @param	floor	Floor this passenger has just boarded.
+	 */
+	public void arrive(Floor floor)
+	{
+		currentFloor = floor.getFloorNum();
 	}
 
 	/**
